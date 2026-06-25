@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人生の操舵室</title>
+<style>
+  :root {
+    --deep-sea: #0B1929;
+    --hull: #1C2E3D;
+    --brass: #C8A96E;
+    --brass-dim: #8A7048;
+    --parchment: #E8DFC0;
+    --parchment-dim: #A09878;
+    --mist: #7A9BAD;
+    --horizon: #4A7FA5;
+    --ink: #0D2235;
+
+    --value-sousa: #C8A96E;
+    --value-kazoku: #A8C5A0;
+    --value-shuunyuu: #7FB3D3;
+    --value-kenkou: #C9A0A0;
+    --value-jiyuu: #B8A8D0;
+    --value-ningen: #D4B896;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--deep-sea);
+    color: var(--parchment);
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── 星空背景 ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 15% 20%, rgba(200,169,110,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 8%, rgba(200,169,110,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 15%, rgba(200,169,110,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 5%, rgba(200,169,110,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 25%, rgba(200,169,110,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 45%, rgba(200,169,110,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 35%, rgba(200,169,110,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 40%, rgba(200,169,110,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 60%, rgba(200,169,110,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 55%, rgba(200,169,110,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 65%, rgba(200,169,110,0.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── レイアウト ── */
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── ヘッダー ── */
+  header {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid rgba(200,169,110,0.2);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .logo-area h1 {
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    color: var(--brass);
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .logo-area .subtitle {
+    font-size: 10px;
+    color: var(--mist);
+    letter-spacing: 0.15em;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-tab {
+    background: none;
+    border: 1px solid rgba(200,169,110,0.2);
+    color: var(--mist);
+    padding: 6px 14px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .nav-tab:hover { border-color: var(--brass-dim); color: var(--brass-dim); }
+  .nav-tab.active { border-color: var(--brass); color: var(--brass); background: rgba(200,169,110,0.08); }
+
+  /* ── 日付表示 ── */
+  .date-display {
+    padding: 20px 0 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .date-main {
+    font-size: 26px;
+    font-weight: 300;
+    color: var(--parchment);
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .date-sub {
+    font-size: 12px;
+    color: var(--mist);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── セクション ── */
+  .section {
+    margin-top: 32px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--brass);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(200,169,110,0.15);
+  }
+
+  /* ── 羅針盤エリア ── */
+  .compass-area {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  #compass-canvas {
+    display: block;
+  }
+
+  /* ── スライダーグリッド ── */
+  .sliders-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 8px;
+  }
+
+  .slider-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 36px;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .slider-label {
+    font-size: 12px;
+    color: var(--parchment-dim);
+    letter-spacing: 0.05em;
+    text-align: right;
+  }
+
+  .slider-track {
+    position: relative;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    cursor: pointer;
+  }
+
+  .slider-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transition: width 0.1s;
+  }
+
+  .slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    transition: transform 0.1s;
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  }
+
+  .slider-thumb:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.3); }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: grab;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+
+  .slider-value {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--parchment-dim);
+    font-weight: 300;
+  }
+
+  /* ── テキストエリア ── */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mist);
+    text-transform: uppercase;
+  }
+
+  textarea, input[type="text"] {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(200,169,110,0.15);
+    color: var(--parchment);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 12px 14px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  textarea:focus, input[type="text"]:focus {
+    border-color: rgba(200,169,110,0.4);
+  }
+
+  textarea::placeholder, input[type="text"]::placeholder {
+    color: rgba(122,155,173,0.4);
+    font-size: 13px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* ── 保存ボタン ── */
+  .save-area {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-save {
+    background: none;
+    border: 1px solid var(--brass);
+    color: var(--brass);
+    padding: 12px 48px;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    font-family: inherit;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-save::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--brass);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .btn-save:hover { color: var(--deep-sea); }
+  .btn-save:hover::before { transform: scaleX(1); }
+
+  .btn-save:active { transform: scale(0.98); }
+
+  /* ── 保存完了メッセージ ── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--hull);
+    border: 1px solid rgba(200,169,110,0.3);
+    color: var(--brass);
+    padding: 10px 24px;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    opacity: 0;
+    transition: all 0.4s;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── 振り返りビュー ── */
+  #view-history { display: none; }
+
+  .period-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .period-btn {
+    background: none;
+    border: 1px solid rgba(200,169,110,0.2);
+    color: var(--mist);
+    padding: 5px 16px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .period-btn.active { border-color: var(--brass); color: var(--brass); }
+
+  .chart-container {
+    position: relative;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(200,169,110,0.1);
+    padding: 20px;
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--parchment-dim);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--mist);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    line-height: 2;
+  }
+
+  /* ── ページ表示切り替え ── */
+  #view-today { display: block; }
+
+  /* ── 水平線 ── */
+  .horizon-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(200,169,110,0.15) 20%, rgba(200,169,110,0.15) 80%, transparent);
+    margin: 32px 0;
+  }
+
+  .char-count {
+    font-size: 10px;
+    color: var(--mist);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* ── 痕跡採集 ── */
+  .archive-input-area {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(200,169,110,0.1);
+    padding: 20px;
+  }
+
+  .tag-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .tag-selector-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mist);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .tag-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag-opt {
+    background: none;
+    border: 1px solid rgba(200,169,110,0.2);
+    color: var(--mist);
+    padding: 4px 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .tag-opt:hover { border-color: var(--brass-dim); color: var(--brass-dim); }
+  .tag-opt.active { border-color: var(--brass); color: var(--brass); background: rgba(200,169,110,0.08); }
+
+  .archive-filter {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .filter-btn {
+    background: none;
+    border: 1px solid rgba(200,169,110,0.15);
+    color: rgba(122,155,173,0.6);
+    padding: 4px 12px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { border-color: var(--brass-dim); color: var(--brass-dim); }
+  .filter-btn.active { border-color: var(--brass); color: var(--brass); }
+
+  .archive-entry {
+    border-top: 1px solid rgba(200,169,110,0.08);
+    padding: 16px 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px 16px;
+    align-items: start;
+    transition: opacity 0.2s;
+  }
+
+  .archive-entry.hidden { display: none; }
+
+  .archive-tag {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .archive-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--parchment);
+    white-space: pre-wrap;
+  }
+
+  .archive-meta {
+    font-size: 9px;
+    color: rgba(122,155,173,0.45);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  .archive-image-area {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-camera {
+    background: none;
+    border: 1px dashed rgba(200,169,110,0.3);
+    color: var(--mist);
+    padding: 8px 16px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-camera:hover { border-color: var(--brass-dim); color: var(--brass-dim); }
+
+  .preview-thumb {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+  }
+
+  .preview-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 1px solid rgba(200,169,110,0.2);
+    display: block;
+  }
+
+  .preview-thumb-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    background: rgba(11,25,41,0.9);
+    border: 1px solid rgba(200,169,110,0.3);
+    color: var(--mist);
+    font-size: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .archive-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .archive-image-thumb {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid rgba(200,169,110,0.15);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .archive-image-thumb:hover { opacity: 0.8; }
+
+  /* ── 画像ライトボックス ── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(11,25,41,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    cursor: pointer;
+  }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border: 1px solid rgba(200,169,110,0.2);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: none;
+    border: 1px solid rgba(200,169,110,0.3);
+    color: var(--brass);
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .archive-delete {
+    background: none;
+    border: none;
+    color: rgba(122,155,173,0.25);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 4px;
+    font-family: inherit;
+    transition: color 0.2s;
+    grid-column: 3;
+    align-self: start;
+  }
+
+  .archive-delete:hover { color: rgba(201,160,160,0.7); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="logo-area">
+      <h1>人生の操舵室</h1>
+      <div class="subtitle">— 現在地を知るための道具 —</div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('today')">今日の記録</button>
+      <button class="nav-tab" onclick="showView('history')">航路の記録</button>
+      <button class="nav-tab" onclick="showView('archive')">痕跡採集</button>
+    </nav>
+  </header>
+
+  <!-- ── 今日の記録ビュー ── -->
+  <div id="view-today">
+
+    <div class="date-display">
+      <span class="date-main" id="date-main"></span>
+      <span class="date-sub" id="date-sub"></span>
+    </div>
+
+    <div class="section">
+      <div class="section-label">羅針盤 — 今日の状態</div>
+      <div class="compass-area">
+        <canvas id="compass-canvas" width="280" height="280"></canvas>
+        <div class="sliders-grid" id="sliders-container"></div>
+      </div>
+    </div>
+
+    <div class="horizon-line"></div>
+
+    <div class="section">
+      <div class="section-label">航海日誌</div>
+      <div class="two-col">
+        <div class="field-group">
+          <div class="field-label">今日の出来事</div>
+          <textarea id="events" rows="5" placeholder="今日あったことを、3行ほどで&#10;・&#10;・&#10;・" maxlength="300"></textarea>
+          <div class="char-count"><span id="events-count">0</span> / 300</div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">今日の感情</div>
+          <textarea id="feelings" rows="5" placeholder="今どんな気持ちか、思いつくまま" maxlength="300"></textarea>
+          <div class="char-count"><span id="feelings-count">0</span> / 300</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="save-area">
+      <button class="btn-save" onclick="saveToday()">記録する</button>
+    </div>
+
+  </div>
+
+  <!-- ── 痕跡採集ビュー ── -->
+  <div id="view-archive" style="display:none;">
+
+    <div class="date-display">
+      <span class="date-main">痕跡採集</span>
+      <span class="date-sub">アイデア・発見・メモの貯蔵庫</span>
+    </div>
+
+    <div class="section">
+      <div class="section-label">新しい痕跡を記録</div>
+      <div class="archive-input-area">
+        <div class="field-group">
+          <textarea id="archive-text" rows="3" placeholder="気づいたこと、拾った言葉、アイデアのかけら…" maxlength="500"></textarea>
+          <div class="char-count"><span id="archive-count">0</span> / 500</div>
+        </div>
+        <div class="archive-image-area">
+          <button class="btn-camera" onclick="document.getElementById('archive-file-input').click()">
+            ＋ 写真を追加
+          </button>
+          <input type="file" id="archive-file-input" accept="image/*" capture="environment" multiple style="display:none">
+          <div id="archive-preview-thumbs" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+        <div class="tag-selector">
+          <span class="tag-selector-label">種別</span>
+          <div class="tag-options" id="tag-options">
+            <button class="tag-opt active" data-tag="アイデア">アイデア</button>
+            <button class="tag-opt" data-tag="発見">発見</button>
+            <button class="tag-opt" data-tag="制作メモ">制作メモ</button>
+            <button class="tag-opt" data-tag="会話">会話</button>
+            <button class="tag-opt" data-tag="散歩">散歩</button>
+            <button class="tag-opt" data-tag="その他">その他</button>
+          </div>
+        </div>
+        <div class="save-area" style="margin-top:16px;">
+          <button class="btn-save" onclick="saveArchiveEntry()">採集する</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="horizon-line"></div>
+
+    <div class="section">
+      <div class="section-label">採集された痕跡</div>
+      <div class="archive-filter" id="archive-filter">
+        <button class="filter-btn active" data-filter="all" onclick="filterArchive('all', this)">すべて</button>
+        <button class="filter-btn" data-filter="アイデア" onclick="filterArchive('アイデア', this)">アイデア</button>
+        <button class="filter-btn" data-filter="発見" onclick="filterArchive('発見', this)">発見</button>
+        <button class="filter-btn" data-filter="制作メモ" onclick="filterArchive('制作メモ', this)">制作メモ</button>
+        <button class="filter-btn" data-filter="会話" onclick="filterArchive('会話', this)">会話</button>
+        <button class="filter-btn" data-filter="散歩" onclick="filterArchive('散歩', this)">散歩</button>
+        <button class="filter-btn" data-filter="その他" onclick="filterArchive('その他', this)">その他</button>
+      </div>
+      <div id="archive-list"></div>
+    </div>
+
+  </div>
+
+  <!-- ── 振り返りビュー ── -->
+  <div id="view-history">
+    <div class="section">
+      <div class="section-label">航路の記録</div>
+      <div class="period-selector">
+        <button class="period-btn active" onclick="setPeriod(7, this)">7日間</button>
+        <button class="period-btn" onclick="setPeriod(30, this)">30日間</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="history-canvas" width="780" height="320"></canvas>
+        <div class="chart-legend" id="chart-legend"></div>
+      </div>
+    </div>
+
+    <div class="section" id="recent-logs-section">
+      <div class="section-label">最近の記録</div>
+      <div id="recent-logs"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">記録を保存しました</div>
+
+<script>
+// ── データ定義 ──
+const AXES = [
+  { key: 'sousa',   label: '創作',   color: '#C8A96E' },
+  { key: 'kazoku',  label: '家族',   color: '#A8C5A0' },
+  { key: 'shuunyuu', label: '収入', color: '#7FB3D3' },
+  { key: 'kenkou',  label: '健康',   color: '#C9A0A0' },
+  { key: 'jiyuu',   label: '自由',   color: '#B8A8D0' },
+  { key: 'ningen',  label: '人間関係', color: '#D4B896' },
+];
+
+let currentPeriod = 7;
+let values = {};
+AXES.forEach(a => values[a.key] = 50);
+
+// ── LocalStorage ──
+function loadData() {
+  const raw = localStorage.getItem('sodasitsu_records');
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveData(records) {
+  localStorage.setItem('sodasitsu_records', JSON.stringify(records));
+}
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ── 日付表示 ──
+function initDate() {
+  const d = new Date();
+  const days = ['日','月','火','水','木','金','土'];
+  document.getElementById('date-main').textContent =
+    `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  document.getElementById('date-sub').textContent =
+    `${days[d.getDay()]}曜日`;
+}
+
+// ── 今日のデータを読み込む ──
+function loadTodayIfExists() {
+  const records = loadData();
+  const key = getTodayKey();
+  const today = records.find(r => r.date === key);
+  if (today) {
+    AXES.forEach(a => {
+      values[a.key] = today.values[a.key] ?? 50;
+    });
+    document.getElementById('events').value = today.events || '';
+    document.getElementById('feelings').value = today.feelings || '';
+    updateAllSliders();
+    drawCompass();
+    updateCharCounts();
+  }
+}
+
+// ── スライダー生成 ──
+function initSliders() {
+  const container = document.getElementById('sliders-container');
+  AXES.forEach(axis => {
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+
+    const label = document.createElement('div');
+    label.className = 'slider-label';
+    label.textContent = axis.label;
+
+    const track = document.createElement('div');
+    track.style.cssText = 'flex:1; position:relative;';
+
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = 0;
+    input.max = 100;
+    input.value = values[axis.key];
+    input.id = `slider-${axis.key}`;
+    input.style.cssText = `
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      outline: none;
+      cursor: pointer;
+      accent-color: ${axis.color};
+    `;
+
+    // カスタムスタイル for thumb
+    const style = document.createElement('style');
+    style.textContent = `
+      #slider-${axis.key}::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: ${axis.color};
+        cursor: grab;
+        box-shadow: 0 0 8px ${axis.color}66;
+      }
+      #slider-${axis.key}::-moz-range-thumb {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: ${axis.color};
+        cursor: grab;
+        border: none;
+        box-shadow: 0 0 8px ${axis.color}66;
+      }
+    `;
+    document.head.appendChild(style);
+
+    input.addEventListener('input', () => {
+      values[axis.key] = parseInt(input.value);
+      document.getElementById(`val-${axis.key}`).textContent = input.value;
+      drawCompass();
+    });
+
+    track.appendChild(input);
+
+    const valDisplay = document.createElement('div');
+    valDisplay.className = 'slider-value';
+    valDisplay.id = `val-${axis.key}`;
+    valDisplay.textContent = values[axis.key];
+
+    row.appendChild(label);
+    row.appendChild(track);
+    row.appendChild(valDisplay);
+    container.appendChild(row);
+  });
+}
+
+function updateAllSliders() {
+  AXES.forEach(a => {
+    const el = document.getElementById(`slider-${a.key}`);
+    if (el) {
+      el.value = values[a.key];
+      document.getElementById(`val-${a.key}`).textContent = values[a.key];
+    }
+  });
+}
+
+// ── 羅針盤（レーダーチャート）描画 ──
+function drawCompass() {
+  const canvas = document.getElementById('compass-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const R = Math.min(W, H) * 0.38;
+  const n = AXES.length;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 外周の同心円（海図グリッド）
+  const rings = [20, 40, 60, 80, 100];
+  rings.forEach(pct => {
+    const r = R * pct / 100;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = pct === 100
+      ? 'rgba(200,169,110,0.25)'
+      : 'rgba(200,169,110,0.08)';
+    ctx.lineWidth = pct === 100 ? 1 : 0.5;
+    ctx.stroke();
+  });
+
+  // 軸の線
+  AXES.forEach((axis, i) => {
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const x = cx + Math.cos(angle) * R;
+    const y = cy + Math.sin(angle) * R;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = 'rgba(200,169,110,0.12)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  });
+
+  // 値の多角形（グロー付き）
+  ctx.beginPath();
+  AXES.forEach((axis, i) => {
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const r = R * values[axis.key] / 100;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+
+  // グラデーション塗り
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+  grad.addColorStop(0, 'rgba(200,169,110,0.20)');
+  grad.addColorStop(1, 'rgba(200,169,110,0.04)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(200,169,110,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // 各頂点の点
+  AXES.forEach((axis, i) => {
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const r = R * values[axis.key] / 100;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = axis.color;
+    ctx.fill();
+  });
+
+  // ラベル
+  ctx.save();
+  AXES.forEach((axis, i) => {
+    const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+    const labelR = R + 22;
+    const x = cx + Math.cos(angle) * labelR;
+    const y = cy + Math.sin(angle) * labelR;
+    ctx.font = '11px "Hiragino Kaku Gothic ProN", sans-serif';
+    ctx.fillStyle = 'rgba(200,169,110,0.8)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(axis.label, x, y);
+  });
+  ctx.restore();
+
+  // 中心の羅針盤マーク
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(200,169,110,0.5)';
+  ctx.fill();
+}
+
+// ── 文字数カウント ──
+function updateCharCounts() {
+  document.getElementById('events-count').textContent =
+    document.getElementById('events').value.length;
+  document.getElementById('feelings-count').textContent =
+    document.getElementById('feelings').value.length;
+}
+
+document.getElementById('events').addEventListener('input', updateCharCounts);
+document.getElementById('feelings').addEventListener('input', updateCharCounts);
+
+// ── 保存 ──
+function saveToday() {
+  const records = loadData();
+  const key = getTodayKey();
+  const existing = records.findIndex(r => r.date === key);
+
+  const record = {
+    date: key,
+    values: { ...values },
+    events: document.getElementById('events').value,
+    feelings: document.getElementById('feelings').value,
+    savedAt: new Date().toISOString(),
+  };
+
+  if (existing >= 0) records[existing] = record;
+  else records.push(record);
+
+  saveData(records);
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ── 振り返りグラフ ──
+function setPeriod(days, btn) {
+  currentPeriod = days;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawHistory();
+}
+
+function drawHistory() {
+  const records = loadData();
+  const canvas = document.getElementById('history-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // レスポンシブ幅
+  const container = canvas.parentElement;
+  const W = container.clientWidth - 40;
+  canvas.width = W;
+  const H = 320;
+  canvas.height = H;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (records.length === 0) {
+    ctx.font = '13px "Hiragino Kaku Gothic ProN", sans-serif';
+    ctx.fillStyle = 'rgba(122,155,173,0.5)';
+    ctx.textAlign = 'center';
+    ctx.fillText('まだ記録がありません', W/2, H/2);
+    return;
+  }
+
+  // 期間のデータを抽出
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - currentPeriod + 1);
+
+  const filtered = records
+    .filter(r => new Date(r.date) >= cutoff)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (filtered.length === 0) {
+    ctx.font = '13px "Hiragino Kaku Gothic ProN", sans-serif';
+    ctx.fillStyle = 'rgba(122,155,173,0.5)';
+    ctx.textAlign = 'center';
+    ctx.fillText(`過去${currentPeriod}日間の記録はありません`, W/2, H/2);
+    return;
+  }
+
+  const pad = { top: 20, right: 20, bottom: 40, left: 30 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+
+  // グリッド
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = pad.top + chartH * (1 - v / 100);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.strokeStyle = v === 50
+      ? 'rgba(200,169,110,0.12)'
+      : 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    if (v === 0 || v === 50 || v === 100) {
+      ctx.font = '9px monospace';
+      ctx.fillStyle = 'rgba(122,155,173,0.5)';
+      ctx.textAlign = 'right';
+      ctx.fillText(v, pad.left - 4, y + 3);
+    }
+  });
+
+  // 各軸の折れ線
+  AXES.forEach(axis => {
+    const pts = filtered.map((r, i) => {
+      const x = pad.left + (filtered.length === 1 ? chartW / 2 : chartW * i / (filtered.length - 1));
+      const y = pad.top + chartH * (1 - (r.values[axis.key] ?? 50) / 100);
+      return { x, y };
+    });
+
+    ctx.beginPath();
+    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.strokeStyle = axis.color + 'BB';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    pts.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = axis.color;
+      ctx.fill();
+    });
+  });
+
+  // 日付ラベル
+  filtered.forEach((r, i) => {
+    const x = pad.left + (filtered.length === 1 ? chartW / 2 : chartW * i / (filtered.length - 1));
+    const parts = r.date.split('-');
+    const label = `${parts[1]}/${parts[2]}`;
+    ctx.font = '9px monospace';
+    ctx.fillStyle = 'rgba(122,155,173,0.6)';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, H - pad.bottom + 14);
+  });
+
+  // 凡例
+  const legend = document.getElementById('chart-legend');
+  legend.innerHTML = '';
+  AXES.forEach(a => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-dot" style="background:${a.color}"></div>${a.label}`;
+    legend.appendChild(item);
+  });
+
+  // 最近の記録
+  drawRecentLogs(records);
+}
+
+function drawRecentLogs(records) {
+  const container = document.getElementById('recent-logs');
+  const recent = [...records].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+
+  if (recent.length === 0) {
+    container.innerHTML = '<div class="empty-state">まだ記録がありません。<br>今日の状態を記録してみてください。</div>';
+    return;
+  }
+
+  container.innerHTML = recent.map(r => {
+    const parts = r.date.split('-');
+    const dateStr = `${parts[0]}.${parts[1]}.${parts[2]}`;
+    const bars = AXES.map(a => {
+      const v = r.values[a.key] ?? 50;
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:10px;color:rgba(122,155,173,0.7);width:52px;text-align:right;">${a.label}</span>
+        <div style="flex:1;height:2px;background:rgba(255,255,255,0.06);position:relative;">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${v}%;background:${a.color};opacity:0.7;"></div>
+        </div>
+        <span style="font-size:10px;color:rgba(122,155,173,0.5);width:22px;">${v}</span>
+      </div>`;
+    }).join('');
+
+    return `<div style="border-top:1px solid rgba(200,169,110,0.1);padding:16px 0;">
+      <div style="font-size:11px;color:var(--brass);letter-spacing:0.1em;margin-bottom:12px;">${dateStr}</div>
+      ${bars}
+      ${r.events ? `<div style="font-size:12px;color:rgba(200,212,220,0.6);margin-top:12px;line-height:1.8;white-space:pre-wrap;">${r.events}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── ビュー切り替え（archive対応版）──
+function showView(view) {
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs[0].classList.toggle('active', view === 'today');
+  tabs[1].classList.toggle('active', view === 'history');
+  tabs[2].classList.toggle('active', view === 'archive');
+  document.getElementById('view-today').style.display   = view === 'today'   ? 'block' : 'none';
+  document.getElementById('view-history').style.display = view === 'history' ? 'block' : 'none';
+  document.getElementById('view-archive').style.display = view === 'archive' ? 'block' : 'none';
+  if (view === 'history') drawHistory();
+  if (view === 'archive') renderArchive();
+}
+
+// ── 痕跡採集 ──
+const TAG_COLORS = {
+  'アイデア': '#B8A8D0',
+  '発見':     '#A8C5A0',
+  '制作メモ': '#C8A96E',
+  '会話':     '#7FB3D3',
+  '散歩':     '#A0C5B8',
+  'その他':   '#A09878',
+};
+
+let selectedTag = 'アイデア';
+let currentFilter = 'all';
+let pendingImages = []; // { dataUrl, name }
+
+document.getElementById('tag-options').addEventListener('click', e => {
+  const btn = e.target.closest('.tag-opt');
+  if (!btn) return;
+  document.querySelectorAll('.tag-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTag = btn.dataset.tag;
+});
+
+document.getElementById('archive-text').addEventListener('input', () => {
+  document.getElementById('archive-count').textContent =
+    document.getElementById('archive-text').value.length;
+});
+
+// 画像ファイル選択
+document.getElementById('archive-file-input').addEventListener('change', async e => {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    const dataUrl = await resizeImage(file, 1200);
+    pendingImages.push({ dataUrl, name: file.name });
+  }
+  renderPendingThumbs();
+  e.target.value = '';
+});
+
+function resizeImage(file, maxSize) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.src = url;
+  });
+}
+
+function renderPendingThumbs() {
+  const container = document.getElementById('archive-preview-thumbs');
+  container.innerHTML = pendingImages.map((img, i) => `
+    <div class="preview-thumb">
+      <img src="${img.dataUrl}" alt="">
+      <button class="preview-thumb-remove" onclick="removePendingImage(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function removePendingImage(i) {
+  pendingImages.splice(i, 1);
+  renderPendingThumbs();
+}
+
+function loadArchive() {
+  const raw = localStorage.getItem('sodasitsu_archive');
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveArchive(entries) {
+  localStorage.setItem('sodasitsu_archive', JSON.stringify(entries));
+}
+
+function saveArchiveEntry() {
+  const text = document.getElementById('archive-text').value.trim();
+  if (!text && pendingImages.length === 0) return;
+
+  const entries = loadArchive();
+  entries.unshift({
+    id: Date.now(),
+    tag: selectedTag,
+    text,
+    images: pendingImages.map(i => i.dataUrl),
+    createdAt: new Date().toISOString(),
+  });
+  saveArchive(entries);
+
+  document.getElementById('archive-text').value = '';
+  document.getElementById('archive-count').textContent = '0';
+  pendingImages = [];
+  renderPendingThumbs();
+  renderArchive();
+
+  const toast = document.getElementById('toast');
+  toast.textContent = '痕跡を採集しました';
+  toast.classList.add('show');
+  setTimeout(() => { toast.classList.remove('show'); toast.textContent = '記録を保存しました'; }, 2200);
+}
+
+function filterArchive(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderArchive();
+}
+
+function deleteArchiveEntry(id) {
+  const entries = loadArchive().filter(e => e.id !== id);
+  saveArchive(entries);
+  renderArchive();
+}
+
+function renderArchive() {
+  const entries = loadArchive();
+  const container = document.getElementById('archive-list');
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="empty-state">まだ痕跡がありません。<br>気づいたこと、ひろったものを記録してください。</div>';
+    return;
+  }
+
+  const filtered = currentFilter === 'all' ? entries : entries.filter(e => e.tag === currentFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">「${currentFilter}」の痕跡はまだありません。</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(e => {
+    const d = new Date(e.createdAt);
+    const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const color = TAG_COLORS[e.tag] || '#A09878';
+    const imgs = (e.images && e.images.length)
+      ? `<div class="archive-images">${e.images.map((src, idx) =>
+          `<img class="archive-image-thumb" src="${src}" onclick="openLightbox('${e.id}',${idx})">`
+        ).join('')}</div>`
+      : '';
+
+    return `<div class="archive-entry">
+      <span class="archive-tag" style="color:${color}">${e.tag}</span>
+      <div>
+        ${e.text ? `<div class="archive-body">${escapeHtml(e.text)}</div>` : ''}
+        ${imgs}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div class="archive-meta">${dateStr}<br>${timeStr}</div>
+        <button class="archive-delete" onclick="deleteArchiveEntry(${e.id})">削除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openLightbox(entryId, imgIndex) {
+  const entries = loadArchive();
+  const entry = entries.find(e => String(e.id) === String(entryId));
+  if (!entry || !entry.images) return;
+  const src = entry.images[imgIndex];
+
+  const box = document.createElement('div');
+  box.className = 'lightbox';
+  box.innerHTML = `
+    <button class="lightbox-close" onclick="this.parentElement.remove()">×</button>
+    <img src="${src}">
+  `;
+  box.addEventListener('click', e => { if (e.target === box) box.remove(); });
+  document.body.appendChild(box);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── 初期化 ──
+initDate();
+initSliders();
+loadTodayIfExists();
+drawCompass();
+</script>
+</body>
+</html>
