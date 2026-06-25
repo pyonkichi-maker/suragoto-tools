@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>人生の操舵室</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0B1929">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="操舵室">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <style>
   :root {
     --deep-sea: #0B1929;
@@ -1452,6 +1458,11 @@ function openLightbox(entryId, imgIndex) {
 
 function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Service Worker 登録 ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
 }
 
 // ── 初期化 ──
