@@ -419,6 +419,58 @@
     margin: 32px 0;
   }
 
+  /* ── モバイル対応 ── */
+  @media (max-width: 600px) {
+    #app { padding: 0 16px 60px; }
+
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 20px 0 16px;
+    }
+
+    .nav-tabs { width: 100%; }
+    .nav-tab { flex: 1; text-align: center; padding: 8px 4px; font-size: 10px; }
+
+    .date-main { font-size: 20px; }
+
+    .compass-area {
+      grid-template-columns: 1fr;
+    }
+
+    #compass-canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-width: 280px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .sliders-grid { padding-top: 16px; }
+
+    .slider-row { grid-template-columns: 52px 1fr 30px; gap: 8px; }
+    .slider-label { font-size: 11px; }
+
+    .two-col { grid-template-columns: 1fr; gap: 16px; }
+
+    .archive-input-area { padding: 14px; }
+
+    .tag-selector { gap: 8px; }
+    .tag-options { gap: 4px; }
+    .tag-opt { padding: 4px 10px; font-size: 10px; }
+
+    .archive-filter { gap: 4px; }
+    .filter-btn { padding: 4px 10px; font-size: 10px; }
+
+    .archive-entry { grid-template-columns: auto 1fr auto; gap: 8px 10px; }
+    .archive-body { font-size: 13px; }
+
+    .btn-save { padding: 12px 32px; }
+
+    .period-selector { gap: 6px; }
+  }
+
   .char-count {
     font-size: 10px;
     color: var(--mist);
